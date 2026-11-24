@@ -1,0 +1,34 @@
+# deps
+node_modules
+
+# build
+dist
+.tanstack
+*.tsbuildinfo
+
+# env
+.env
+.env.*
+!.env.example
+
+# native build output (프로젝트 파일은 커밋, 빌드 산출물만 제외)
+android/app/build
+android/build
+android/.gradle
+android/local.properties
+ios/App/build
+ios/DerivedData
+ios/App/App/public
+android/app/src/main/assets/public
+
+# editor / os
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# Claude 개인 설정 (팀 공유용은 CLAUDE.md, .claude/settings.json, .claude/rules/, .claude/skills/ 로 커밋)
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/rules/local/
+.claude/skills/local-*/
