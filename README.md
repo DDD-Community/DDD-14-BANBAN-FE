@@ -6,16 +6,16 @@
 
 ## 기술 스택
 
-| 영역 | 기술 | 버전 |
-| --- | --- | --- |
-| 런타임 | Node.js | 26 LTS |
-| 패키지 매니저 | pnpm | 12.23.0 |
-| UI | React | 19.3.1 |
-| 빌드 | Vite | 8.3.8 |
-| 언어 | TypeScript | 6.0.3 |
+| 영역            | 기술                    | 버전               |
+| --------------- | ----------------------- | ------------------ |
+| 런타임          | Node.js                 | 26 LTS             |
+| 패키지 매니저   | pnpm                    | 12.23.0            |
+| UI              | React                   | 19.3.1             |
+| 빌드            | Vite                    | 8.3.8              |
+| 언어            | TypeScript              | 6.0.3              |
 | 라우팅·프리렌더 | TanStack Router / Start | 1.170.46 / 1.169.7 |
-| 서버 상태 | TanStack Query | 5.108.4 |
-| 앱 | Capacitor | 8.6.2 |
+| 서버 상태       | TanStack Query          | 5.108.4            |
+| 앱              | Capacitor               | 8.6.2              |
 
 버전은 모두 정확히 고정(exact)합니다. TypeScript를 7이 아닌 6.0으로 둔 이유는 typescript-eslint가 아직 `<6.1`만 지원하기 때문입니다.
 
@@ -31,35 +31,65 @@ pnpm dev
 
 ## 스크립트
 
-| 명령 | 설명 |
-| --- | --- |
-| `pnpm dev` | 개발 서버 |
-| `pnpm build` | 웹 빌드 (공개 페이지 프리렌더 포함) |
-| `pnpm build:app` | 앱용 SPA 셸 빌드 |
-| `pnpm preview` | 웹 빌드 결과 미리보기 |
-| `pnpm typecheck` | 타입 검사 |
-| `pnpm cap:sync` | 앱 빌드 후 iOS·Android 프로젝트에 반영 |
-| `pnpm cap:ios` | 동기화 후 Xcode 열기 |
-| `pnpm cap:android` | 동기화 후 Android Studio 열기 |
+| 명령                | 설명                                                   |
+| ------------------- | ------------------------------------------------------ |
+| `pnpm dev`          | 개발 서버                                              |
+| `pnpm build`        | 웹 빌드 (공개 페이지 프리렌더 포함)                    |
+| `pnpm build:app`    | 앱용 SPA 셸 빌드                                       |
+| `pnpm preview`      | 웹 빌드 결과 미리보기                                  |
+| `pnpm typecheck`    | 타입 검사                                              |
+| `pnpm lint`         | TypeScript·React Hooks·접근성·TanStack Query 규칙 검사 |
+| `pnpm lint:fix`     | 자동 수정 가능한 ESLint 오류 수정                      |
+| `pnpm format`       | Prettier 포맷 적용                                     |
+| `pnpm format:check` | 포맷 검사                                              |
+| `pnpm check`        | 타입·ESLint·포맷 전체 검사                             |
+| `pnpm cap:sync`     | 앱 빌드 후 iOS·Android 프로젝트에 반영                 |
+| `pnpm cap:ios`      | 동기화 후 Xcode 열기                                   |
+| `pnpm cap:android`  | 동기화 후 Android Studio 열기                          |
+
+## 폴더 구조와 개발 규칙
+
+새 코드는 다음 책임에 따라 배치합니다. `features/`, `shared/`는 실제 코드가 필요할 때 생성합니다.
+
+```text
+src/
+├── routes/          # 경로·loader·메타데이터·화면 연결
+├── features/<기능>/ # 기능별 UI·API·Query·로직
+├── shared/          # 여러 기능에서 사용하는 UI·API·유틸·플랫폼 연동
+├── router.tsx       # Router·QueryClient 생성과 컨텍스트
+└── routeTree.gen.ts # 자동 생성 파일
+```
+
+기본 의존 방향은 `routes → features → shared`이며, `routes → shared`도 허용합니다. 한 기능에서만 쓰는 코드는 해당 feature에 둡니다.
+
+상세 import 규칙, 상태 관리, 웹·앱 주의사항과 변경별 검증 기준은 [AGENTS.md](./AGENTS.md)를 따릅니다.
+
+## 코드 품질
+
+- ESLint 설정은 `eslint.config.mjs`, 포맷 설정은 `.prettierrc.json`에서 관리합니다.
+- ESLint는 타입 기반 검사와 React Hooks·접근성·TanStack Query 권장 규칙을 적용합니다.
+- Prettier는 세미콜론 없이 작은따옴표, 들여쓰기 2칸, 줄 길이 100을 사용합니다.
+- 자동 생성 라우트, 빌드 결과, iOS·Android 프로젝트는 검사와 포맷에서 제외합니다.
+- 변경 후 `pnpm check`로 확인합니다.
 
 ## 빌드 방식
 
 같은 코드를 두 가지로 빌드합니다.
 
-| | `pnpm build` (web) | `pnpm build:app` (app) |
-| --- | --- | --- |
-| 목적 | 검색엔진이 내용을 바로 읽도록 | Capacitor WebView가 열 `index.html` |
-| 결과 (`dist/client`) | 공개 페이지별 완성된 HTML + `_shell.html` | SPA 셸 `index.html` 하나 |
-| 배포 | 정적 호스팅, 프리렌더하지 않은 경로는 `/_shell.html`로 rewrite | `cap sync`로 네이티브 프로젝트에 복사 |
+|                      | `pnpm build` (web)                                             | `pnpm build:app` (app)                |
+| -------------------- | -------------------------------------------------------------- | ------------------------------------- |
+| 목적                 | 검색엔진이 내용을 바로 읽도록                                  | Capacitor WebView가 열 `index.html`   |
+| 결과 (`dist/client`) | 공개 페이지별 완성된 HTML + `_shell.html`                      | SPA 셸 `index.html` 하나              |
+| 배포                 | 정적 호스팅, 프리렌더하지 않은 경로는 `/_shell.html`로 rewrite | `cap sync`로 네이티브 프로젝트에 복사 |
 
 - 새 공개 페이지는 링크로 연결되어 있으면 웹 빌드 때 자동으로 프리렌더됩니다.
 - `src/routes/spa-shell.tsx`는 `_shell.html`을 만들기 위한 빈 라우트입니다. 지우지 마세요.
 
 ## 네이티브 개발 환경
 
-| | 요구 사항 |
-| --- | --- |
-| iOS | macOS, Xcode 26 이상, iOS 15 이상 (Swift Package Manager) |
+|         | 요구 사항                                                          |
+| ------- | ------------------------------------------------------------------ |
+| iOS     | macOS, Xcode 26 이상, iOS 15 이상 (Swift Package Manager)          |
 | Android | Android Studio Otter(2025.2.1) 이상, JDK 21, minSdk 24 / target 36 |
 
 ## 환경 변수
