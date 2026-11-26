@@ -40,6 +40,7 @@ pnpm dev
 | `pnpm typecheck`    | 타입 검사                                              |
 | `pnpm lint`         | TypeScript·React Hooks·접근성·TanStack Query 규칙 검사 |
 | `pnpm lint:fix`     | 자동 수정 가능한 ESLint 오류 수정                      |
+| `pnpm test:imports` | import 의존성 규칙의 허용·차단 회귀 테스트             |
 | `pnpm format`       | Prettier 포맷 적용                                     |
 | `pnpm format:check` | 포맷 검사                                              |
 | `pnpm check`        | 타입·ESLint·포맷 전체 검사                             |
@@ -68,6 +69,8 @@ src/
 
 - ESLint 설정은 `eslint.config.mjs`, 포맷 설정은 `.prettierrc.json`에서 관리합니다.
 - ESLint는 타입 기반 검사와 React Hooks·접근성·TanStack Query 권장 규칙을 적용합니다.
+- import 의존성도 검사합니다. `shared → features/routes/앱 초기화 코드`, `features → routes/앱 초기화 코드`는 금지하고, 다른 feature는 기능 루트의 `index.ts(x)`·`public.ts(x)`를 통해서만 참조합니다. `src` 아래에서 routes·features·shared·styles에 속하지 않는 코드는 앱 초기화 계층으로 분류합니다. alias와 상대 경로, 타입 import·재내보내기·문자열 리터럴 동적 import에 적용합니다.
+- 순환 의존과 공개 인터페이스의 설계 적절성은 코드 리뷰로 확인합니다.
 - Prettier는 세미콜론 없이 작은따옴표, 들여쓰기 2칸, 줄 길이 100을 사용합니다.
 - 자동 생성 라우트, 빌드 결과, iOS·Android 프로젝트는 검사와 포맷에서 제외합니다.
 - 변경 후 `pnpm check`로 확인합니다.
